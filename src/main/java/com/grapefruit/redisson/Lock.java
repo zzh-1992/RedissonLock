@@ -13,10 +13,12 @@ public class Lock {
     public static void main(String[] args) {
 
         Config config = new Config();
-        config.useSingleServer().setAddress("47.115.42.52").setDatabase(5);
+        config.useSingleServer().setAddress("redis://47.115.42.52:6380").setPassword("123456").setDatabase(0);
         RedissonClient client = Redisson.create(config);
         RLock lock = client.getLock("lock");
         lock.lock();
+
+        System.out.println("==>" + lock.unlink());
         // 异步线程 ，默认时间30秒 private long lockWatchdogTimeout = 30 * 1000;
     }
 }
