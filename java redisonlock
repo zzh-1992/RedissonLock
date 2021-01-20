@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 /**
- * @author 柚子苦瓜茶
+ * @author 柚子苦瓜茶  github相关链接:https://github.com/redisson/redisson/wiki/8
  * @version 1.0
  * @ModifyTime 2020/11/12 23:08:11
  */
