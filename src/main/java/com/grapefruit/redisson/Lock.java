@@ -13,7 +13,7 @@ public class Lock {
     public static void main(String[] args) {
 
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://47.115.42.52:6380").setPassword("123456").setDatabase(0);
+        config.useSingleServer().setAddress("redis://47.115.42.52:6379").setPassword("123456").setDatabase(0);
         RedissonClient client = Redisson.create(config);
         RLock lock = client.getLock("lock");
         lock.lock();
@@ -53,6 +53,7 @@ public class Lock {
  *
  *     try {
  *         while (true) {
+ *             // 尝试获取锁
  *             ttl = tryAcquire(leaseTime, unit, threadId);
  *             // lock acquired
  *             if (ttl == null) {
@@ -105,13 +106,19 @@ public class Lock {
  *     internalLockLeaseTime = unit.toMillis(leaseTime);
  *
  *     return commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, command,
+ *             // 如果锁不存在
  *             "if (redis.call('exists', KEYS[1]) == 0) then " +
+ *                     // 设置该锁(key,value)
  *                     "redis.call('hset', KEYS[1], ARGV[2], 1); " +
+ *                     // 设置锁的ttl
  *                     "redis.call('pexpire', KEYS[1], ARGV[1]); " +
  *                     "return nil; " +
  *                     "end; " +
+ *                     // 如果锁存在，并且入参的value和锁对应的value相同(或者理解为线程A加锁,这次又是A到了加锁这一步)
  *                     "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+ *                     // 做锁重入操作
  *                     "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
+ *                     // 再次对这个锁做续命操作
  *                     "redis.call('pexpire', KEYS[1], ARGV[1]); " +
  *                     "return nil; " +
  *                     "end; " +
@@ -130,7 +137,9 @@ public class Lock {
  *         public void run(Timeout timeout) throws Exception {
  *
  *             RFuture<Boolean> future = commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+ *                     // 如果锁存在，并且入参的value和锁对应的value相同(或者理解为线程A加锁,这次又是A到了加锁这一步)
  *                     "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+ *                             // 再次对这个锁做续命操作
  *                             "redis.call('pexpire', KEYS[1], ARGV[1]); " +
  *                             "return 1; " +
  *                             "end; " +
@@ -170,7 +179,7 @@ public class Lock {
  * public long getLockWatchdogTimeout() {
  *         return lockWatchdogTimeout;
  *     }
- *
+ * // 该时间就是锁默认的续命时间
  * private long lockWatchdogTimeout = 30 * 1000; =====>定时任务的默认时间30秒
  */
 

@@ -5,11 +5,7 @@ import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-import org.redisson.config.SingleServerConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 /**
  * @author 柚子苦瓜茶
@@ -30,7 +26,7 @@ public class RedisonLockExample {
 
         Config config = new Config();
         //(config.useSingleServer().setTimeout(1000000)).setAddress("redis://192.168.2.115:6380").setPassword("123456");
-        (config.useSingleServer().setTimeout(1000000)).setAddress("redis://47.115.42.52:6380").setPassword("123456");
+        (config.useSingleServer().setTimeout(1000000)).setAddress("redis://47.115.42.52:6379").setPassword("123456");
         RedissonClient redissonClient = Redisson.create(config);
 
         RLock lock = redissonClient.getLock(LOCK + threadId);
